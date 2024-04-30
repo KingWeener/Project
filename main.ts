@@ -1,23 +1,30 @@
+scene.onOverlapTile(SpriteKind.Player, assets.tile`myTile0`, function (sprite, location) {
+    game.gameOver(false)
+})
+function spawnCoin (list: Sprite[]) {
+    if (info.score() <= 5) {
+        tiles.placeOnRandomTile(list._pickRandom(), sprites.castle.tileDarkGrass2)
+    }
+}
 controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
-    let list: number[] = []
-    flipGravity(true, list)
+    if (mySprite.isHittingTile(CollisionDirection.Top)) {
+        mySprite.ay = 300
+    }
+})
+scene.onOverlapTile(SpriteKind.Player, assets.tile`myTile`, function (sprite, location) {
+    game.gameOver(true)
 })
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     if (mySprite.isHittingTile(CollisionDirection.Bottom)) {
-        mySprite.vy = -150
+        mySprite.ay = -300
     }
 })
-function flipGravity (Gravity: boolean, I_forgot: any[]) {
-    if (controller.B.isPressed() && mySprite.isHittingTile(CollisionDirection.Bottom)) {
-        if (gravity < 0) {
-            gravity = -300
-        } else {
-            gravity = 300
-        }
-    }
-}
-let gravity = 0
+sprites.onOverlap(SpriteKind.Player, SpriteKind.Food, function (sprite, otherSprite) {
+    info.changeScoreBy(1)
+    sprites.destroy(otherSprite)
+})
 let mySprite: Sprite = null
+info.setScore(0)
 mySprite = sprites.create(img`
     . . . . . . . . . b 5 b . . . . 
     . . . . . . . . . b 5 b . . . . 
@@ -36,13 +43,32 @@ mySprite = sprites.create(img`
     . . c b d d d d d 5 5 5 b b . . 
     . . . c c c c c c c c b b . . . 
     `, SpriteKind.Player)
+let mySprite2 = sprites.create(img`
+    . . b b b . . . 
+    . b 5 5 5 b . . 
+    b 5 d 3 d 5 b . 
+    b 5 3 5 1 5 b . 
+    c 5 3 5 1 d c . 
+    c 5 d 1 d d c . 
+    . f d d d f . . 
+    . . f f f . . . 
+    `, SpriteKind.Food)
+let mySprite3 = sprites.create(img`
+    . . b b b . . . 
+    . b 1 1 1 b . . 
+    b 1 9 9 9 1 b . 
+    b 1 9 9 1 1 b . 
+    c 1 9 9 1 9 c . 
+    c 1 9 1 9 9 c . 
+    . f 9 9 9 f . . 
+    . . f f f . . . 
+    `, SpriteKind.Food)
+let list = [mySprite2, mySprite3]
 scene.cameraFollowSprite(mySprite)
-gravity = 300
 tiles.setCurrentTilemap(tilemap`level2`)
+let gravity = 300
 mySprite.ay = gravity
-mySprite.setVelocity(125, 0)
+mySprite.setVelocity(100, 0)
 forever(function () {
-    if (mySprite.vx == 0) {
-        game.gameOver(false)
-    }
+    spawnCoin(list)
 })
